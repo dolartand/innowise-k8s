@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+  namespace: innowise
+data:
+  SPRING_PROFILES_ACTIVE: "docker"
+  SERVER_PORT: "8080"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  namespace: innowise
+data:
+  DB_HOST: "postgres-user"
+  DB_PORT: "5432"
+  DB_NAME: "userdb"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: innowise
+data:
+  DB_HOST: "postgres-auth"
+  DB_PORT: "5432"
+  DB_NAME: "authdb"
+  USER_SERVICE_URL: "http://user-service:8080"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: innowise
+data:
+  DB_HOST: "postgres-order"
+  DB_PORT: "5432"
+  DB_NAME: "orderdb"
+  USER_SERVICE_URL: "http://user-service:8080"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  KAFKA_TOPIC_ORDER_EVENTS: "order-events"
+  KAFKA_TOPIC_PAYMENT_EVENTS: "payment-events"
+  KAFKA_CONSUMER_GROUP_ID: "order-service-group"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: innowise
+data:
+  MONDODB_URI: "mongodb://mongodb:27017/payment_db"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  KAFKA_TOPIC_ORDER_EVENTS: "order-events"
+  KAFKA_TOPIC_PAYMENT_EVENTS: "payment-events"
+  KAFKA_CONSUMER_GROUP_ID: "payment-service-group"
+  RANDOMORG_API_URL: "https://www.random.org/integers/?num=1&min=1&max=100&col=1&base=10&format=plain"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: innowise
+data:
+  AUTH_SERVICE_URL: "http://auth-service:8080"
+  USER_SERVICE_URL: "http://user-service:8080"
+  ORDER_SERVICE_URL: "http://order-service:8080"
+  PAYMENT_SERVICE_URL: "http://payment-service:8080"
