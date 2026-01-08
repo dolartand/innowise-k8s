@@ -55,7 +55,7 @@ metadata:
   name: payment-service-config
   namespace: innowise
 data:
-  MONDODB_URI: "mongodb://mongodb:27017/payment_db"
+  MONGODB_URI: "mongodb://mongodb:27017/payment_db"
   KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
   KAFKA_TOPIC_ORDER_EVENTS: "order-events"
   KAFKA_TOPIC_PAYMENT_EVENTS: "payment-events"
