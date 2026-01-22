@@ -24,6 +24,8 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: SPRING_APPLICATION_NAME
+              value: order-service
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
                 configMapKeyRef:
