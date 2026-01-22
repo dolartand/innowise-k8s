@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: payment-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: payment-service
@@ -65,6 +69,11 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: SERVICE_API_KEY
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: monitoring-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

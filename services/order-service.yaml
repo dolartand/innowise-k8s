@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: order-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: order-service
@@ -85,11 +89,16 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: SERVICE_API_KEY
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: monitoring-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 180
+            initialDelaySeconds: 240
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
@@ -97,7 +106,7 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 60
+            initialDelaySeconds: 90
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 3
@@ -106,7 +115,7 @@ spec:
               memory: "256Mi"
               cpu: "250m"
             limits:
-              memory: "512Mi"
+              memory: "1Gi"
               cpu: "500m"
 
 ---

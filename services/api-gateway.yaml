@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: api-gateway
@@ -60,6 +64,11 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: SERVICE_API_KEY
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: monitoring-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
           livenessProbe:
             httpGet:
               path: /actuator/health
