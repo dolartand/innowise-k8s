@@ -15,29 +15,13 @@ spec:
     path: "/mnt/data/kafka"
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: kafka-pvc
-  namespace: innowise
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  selector:
-    matchLabels:
-      app: kafka
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka
   namespace: innowise
 spec:
+  serviceName: kafka
   replicas: 1
   selector:
     matchLabels:
@@ -83,13 +67,13 @@ spec:
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
               value: "1"
             - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
-              value:  "1"
+              value: "1"
             - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
               value: "1"
             - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
               value: "0"
             - name: KAFKA_NUM_PARTITIONS
-              value:  "3"
+              value: "3"
             - name: CLUSTER_ID
               value: "MkU3OEVCNTcwNTJENDM2Qk"
             - name: KAFKA_LOG_DIRS
@@ -124,10 +108,16 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-      volumes:
-        - name: kafka-storage
-          persistentVolumeClaim:
-            claimName: kafka-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-storage
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
 
 ---
 apiVersion: v1
@@ -137,6 +127,7 @@ metadata:
   namespace: innowise
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: kafka
   ports:
@@ -146,4 +137,3 @@ spec:
     - port: 9093
       targetPort: 9093
       name: controller
-

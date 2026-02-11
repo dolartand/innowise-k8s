@@ -15,29 +15,13 @@ spec:
     path: "/mnt/data/postgres-auth"
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-auth-pvc
-  namespace: innowise
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      app: postgres-auth
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres-auth
   namespace: innowise
 spec:
+  serviceName: postgres-auth
   replicas: 1
   selector:
     matchLabels:
@@ -97,10 +81,16 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-      volumes:
-        - name: postgres-storage
-          persistentVolumeClaim:
-            claimName: postgres-auth-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
 apiVersion: v1
@@ -110,10 +100,9 @@ metadata:
   namespace: innowise
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: postgres-auth
   ports:
     - port: 5432
       targetPort: 5432
-
-
