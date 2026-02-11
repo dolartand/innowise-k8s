@@ -15,29 +15,13 @@ spec:
     path: "/mnt/data/redis"
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-pvc
-  namespace: innowise
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 500Mi
-  selector:
-    matchLabels:
-      app: redis
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   namespace: innowise
 spec:
+  serviceName: redis
   replicas: 1
   selector:
     matchLabels:
@@ -82,10 +66,16 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "200m"
-      volumes:
-        - name: redis-storage
-          persistentVolumeClaim:
-            claimName: redis-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-storage
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
 
 ---
 apiVersion: v1
@@ -95,6 +85,7 @@ metadata:
   namespace: innowise
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: redis
   ports:

@@ -15,29 +15,13 @@ spec:
     path: "/mnt/data/postgres-user"
 
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-user-pvc
-  namespace: innowise
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      app: postgres-user
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: postgres-user
   namespace: innowise
 spec:
+  serviceName: postgres-user
   replicas: 1
   selector:
     matchLabels:
@@ -97,10 +81,16 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-      volumes:
-        - name: postgres-storage
-          persistentVolumeClaim:
-            claimName: postgres-user-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
 
 ---
 apiVersion: v1
@@ -110,11 +100,9 @@ metadata:
   namespace: innowise
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: postgres-user
   ports:
     - port: 5432
       targetPort: 5432
-
-
-  
